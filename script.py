@@ -7,17 +7,6 @@ from mysql.connector import errorcode
 from datetime import datetime
 from config import *
 
-def checkLastUpdated():
-    source_file_info = requests.get("https://api.github.com/repos/hurlbertlab/dietdatabase/commits?path=AvianDietDatabase.txt&page=1&per_page=1")
-    json_response = source_file_info.json()
-    time = json_response[0]["commit"]["author"]["date"]
-    src_file_last_commit_time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ')
-    days_since = (start - src_file_last_commit_time).days
-    
-    if days_since > 7:
-        printLog("File from github was last updated " + days_since + " days ago, no changes since last update")
-        exit()
-
 
 def printLog(data):
     print("[LOG] " + str(data))
@@ -31,12 +20,22 @@ def printElapsedTime():
     elapsed_time = datetime.now() - start
     printLog("Elapsed time: " + str(elapsed_time.total_seconds()) + " seconds")
 
+
 filename = 'dietdatabase.txt'
 start = datetime.now()
 
 printLog(start.isoformat() + " - Updating avian_diet table")
 
-checkLastUpdated()
+source_file_info = requests.get(source_data_info)
+json_response = source_file_info.json()
+time = json_response[0]["commit"]["author"]["date"]
+src_file_last_commit_time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ')
+days_since = (start - src_file_last_commit_time).days
+
+if days_since > 7:
+    printLog("File from github was last updated " + days_since + " days ago, no changes since last update")
+    printElapsedTime()
+    exit()
 
 try:
     r = requests.get(source_data_url)
@@ -170,7 +169,8 @@ except mysql.connector.Error as err:
     exit(1)
 
 try:
-    cursor.execute("INSERT table_history(table_name,last_updated) VALUES ('avian_diet', NOW()) ON DUPLICATE KEY UPDATE last_updated=NOW()")
+    last_updated = src_file_last_commit_time.strftime("%B %d, %Y %H:%M:%S UTC")
+    cursor.execute("INSERT table_history(table_name,last_updated) VALUES ('avian_diet', %s) ON DUPLICATE KEY UPDATE last_updated=%s", (last_updated, last_updated))
 except mysql.connector.Error as err:
     printError("Failed updating last updated timestamp for avian_diet in table_history")
     printError(err.msg)
