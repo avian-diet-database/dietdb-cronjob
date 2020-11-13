@@ -31,7 +31,6 @@ def printElapsedTime():
     elapsed_time = datetime.now() - start
     printLog("Elapsed time: " + str(elapsed_time.total_seconds()) + " seconds")
 
-
 filename = 'dietdatabase.txt'
 start = datetime.now()
 
@@ -84,7 +83,7 @@ except mysql.connector.Error as err:
     printElapsedTime()
     exit(1)
 
-with open(filename, newline='') as new_table:
+with open(filename, newline='', encoding='cp1252') as new_table:
     reader = csv.reader(new_table, delimiter='\t')
     # Skip header
     next(reader)
