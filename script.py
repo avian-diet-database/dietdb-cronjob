@@ -169,7 +169,8 @@ except mysql.connector.Error as err:
     exit(1)
 
 try:
-    cursor.execute("INSERT table_history(table_name,last_updated) VALUES ('avian_diet', NOW()) ON DUPLICATE KEY UPDATE last_updated=NOW()")
+    last_updated_time = start.strftime("%B %d, %Y %H:%M:%S UTC")
+    cursor.execute("INSERT table_history(table_name,last_updated) VALUES ('avian_diet', %s) ON DUPLICATE KEY UPDATE last_updated=%s", (last_updated_time, last_updated_time))
 except mysql.connector.Error as err:
     printError("Failed updating last updated timestamp for avian_diet in table_history")
     printError(err.msg)
