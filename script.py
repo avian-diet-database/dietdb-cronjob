@@ -33,7 +33,7 @@ src_file_last_commit_time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ')
 days_since = (start - src_file_last_commit_time).days
 
 if days_since > 7:
-    printLog("File from github was last updated " + days_since + " days ago, no changes since last update")
+    printLog("File from github was last updated " + str(days_since) + " days ago, no changes since last update")
     printElapsedTime()
     exit()
 
