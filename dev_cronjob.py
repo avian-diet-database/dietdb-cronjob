@@ -59,14 +59,14 @@ with open(filename, 'wb') as f:
     f.write(r.content)
 
 try:
-    # conn = mysql.connector.connect(host=db_host,
-    #                                user=db_user,
-    #                                password=db_pass,
-    #                                database=db_name)
-    conn = mysql.connector.connect(port=9999,
-                                   user='user2H5',
-                                   password='TAD5iUVutwjduh7K',
-                                   database='birddietdb')
+    conn = mysql.connector.connect(host=db_host,
+                                   user=db_user,
+                                   password=db_pass,
+                                   database=db_name)
+    # conn = mysql.connector.connect(port=9999,
+    #                                user='user2H5',
+    #                                password='TAD5iUVutwjduh7K',
+    #                                database='birddietdb')
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         printError("Something is wrong with your user name or password")
