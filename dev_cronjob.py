@@ -29,8 +29,8 @@ start = datetime.now()
 
 printLog(start.isoformat() + " - Updating avian_diet table")
 
-# source_file_info = requests.get(source_data_info)
-source_file_info = requests.get('https://api.github.com/repos/c2kle/dietdbtest/commits?path=AvianDietDatabaseWithNew.txt&page=1&per_page=1')
+source_file_info = requests.get(source_data_info)
+# source_file_info = requests.get('https://api.github.com/repos/c2kle/dietdbtest/commits?path=AvianDietDatabaseWithNew.txt&page=1&per_page=1')
 json_response = source_file_info.json()
 time = json_response[0]["commit"]["author"]["date"]
 src_file_last_commit_time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ')
@@ -42,16 +42,16 @@ if days_since > 7:
     exit()
 
 try:
-    # r = requests.get(source_data_url)
-    r = requests.get('https://raw.githubusercontent.com/c2kle/dietdbtest/main/AvianDietDatabaseWithNew.txt')
+    r = requests.get(source_data_url)
+    # r = requests.get('https://raw.githubusercontent.com/c2kle/dietdbtest/main/AvianDietDatabaseWithNew.txt')
 except Exception as e:
     printError(e)
     printElapsedTime()
     exit(1)
 
 if not r.ok:
-    # printError("Source data url returned error: " + source_data_url)
-    printError("Source data url returned error: " + 'https://raw.githubusercontent.com/c2kle/dietdbtest/main/AvianDietdatabaseWithNew.txt')
+    printError("Source data url returned error: " + source_data_url)
+    # printError("Source data url returned error: " + 'https://raw.githubusercontent.com/c2kle/dietdbtest/main/AvianDietdatabaseWithNew.txt')
     printElapsedTime()
     exit(1)
 
@@ -208,9 +208,11 @@ print("begin updating repo")
 
 token = {'Authorization': 'Bearer %s' %personal_access_token}
 # path = 'AvianDietDatabase.txt'
+path = 'AvianDietDatabaseWithNew.txt'
 commit_message = 'cronjob update %s' %str(datetime.now())
 
 try:
+    # r = requests.get('https://api.github.com/repos/hurlbertlab/dietdatabase/git/refs/heads/master')
     r = requests.get('https://api.github.com/repos/c2kle/dietdbtest/git/refs/heads/main')
     #   print(r.json())
     old_commit_sha = r.json()["object"]["sha"]
@@ -226,6 +228,8 @@ except:
     exit(1)
 
 try:
+    
+    # r2 = requests.get('https://api.github.com/repos/hurlbertlab/dietdatabase/git/commits/%s'%old_commit_sha)
     r2 = requests.get('https://api.github.com/repos/c2kle/dietdbtest/git/commits/%s'%old_commit_sha)
     # print(r2.json())
     old_tree_sha = r2.json()["tree"]["sha"]
@@ -246,14 +250,14 @@ content = local_appended_opener.read()
 try:
     new_tree_input = {
     'tree': [{
-        'path': 'AvianDietDatabaseWithNew.txt',
+        'path': '%s'%path,
         'mode': '100644',
         'type': 'blob',
         'content':'%s'%content
         }],
     'base_tree': '%s'%old_tree_sha
     }
-
+    # r3 = requests.post('https://api.github.com/repos/hurlbertlab/dietdatabase/git/trees', json=new_tree_input, headers=token)
     r3 = requests.post('https://api.github.com/repos/c2kle/dietdbtest/git/trees', json=new_tree_input, headers=token)
     # print(r3.json())
     new_tree_sha = r3.json()["sha"]
@@ -273,11 +277,11 @@ local_appended_opener.close()
 
 try:
     new_commit_input = {
-        'message': 'test Video',
+        'message': 'Cronjob update' + str(start),
         'tree': '%s'%new_tree_sha,
         'parents': ['%s'%old_commit_sha]
     }
-
+    # r4 = requests.post('https://api.github.com/repos/hurlbertlab/dietdatabase/git/commits', json=new_commit_input, headers=token)
     r4 = requests.post('https://api.github.com/repos/c2kle/dietdbtest/git/commits', json=new_commit_input, headers=token)
     # print(r4.json())
     new_commit_sha = r4.json()["sha"]
@@ -297,7 +301,7 @@ try:
     update_reference_input = {
         'sha': '%s'%new_commit_sha
     }
-
+    # r5 = requests.patch('https://api.github.com/repos/hurlbertlab/dietdatabase/git/refs/heads/master', json=update_reference_input,headers=token)
     r5 = requests.patch('https://api.github.com/repos/c2kle/dietdbtest/git/refs/heads/main', json=update_reference_input,headers=token)
     # print(r5.json())
 except:
