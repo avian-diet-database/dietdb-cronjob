@@ -234,7 +234,7 @@ except:
     printElapsedTime()
     exit(1)
 
-local_appended_opener = open(filename,'r')
+local_appended_opener = open(filename,'r', encoding ='cp1252')
 content = local_appended_opener.read()
 
 try:
