@@ -105,7 +105,7 @@ with open(approvedTableFile,'rb') as f:
     dataframe = pandas.read_csv(f, delimiter= '\t', names=columnNames, dtype=str, encoding='cp1252')
 
 with open(approvedTableFile,'wb') as f:
-    dataframe.to_csv(f,sep='\t',index=False,na_rep='NA',header=False, encoding='cp1252', line_terminator = '\r\n')
+    dataframe.to_csv(f,sep='\t',index=False,na_rep='NA',header=False, encoding='cp1252')
 
 print("Appending new approved data to flat file")
 #append to local flat file
