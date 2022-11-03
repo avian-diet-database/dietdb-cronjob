@@ -35,10 +35,8 @@ time = json_response[0]["commit"]["author"]["date"]
 src_file_last_commit_time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ')
 days_since = (start - src_file_last_commit_time).days
 
-# if days_since > 7:
-#     printLog("File from github was last updated " + str(days_since) + " days ago, no changes since last update")
-#     printElapsedTime()
-#     exit()
+if days_since > 7:
+    printLog("File from github was last updated " + str(days_since) + " days ago, no changes since last update")
 
 try:
     r = requests.get(source_data_url)
