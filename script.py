@@ -142,7 +142,7 @@ with open(filename, newline='', encoding='cp1252') as new_table:
                     printElapsedTime()
                     exit(1)
         i += 1
-        print(i)
+        print(i, row)
         try:
             cursor.execute(
                 """
