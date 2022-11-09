@@ -142,7 +142,6 @@ with open(filename, newline='', encoding='cp1252') as new_table:
                     printElapsedTime()
                     exit(1)
         i += 1
-        print(i, row)
         try:
             cursor.execute(
                 """
@@ -183,6 +182,7 @@ with open(filename, newline='', encoding='cp1252') as new_table:
             """, tuple(row))
         except mysql.connector.Error as err:
             printError("Failed inserting row:")
+            print(i)
             printError(row)
             printError(err.msg)
             cursor.close()

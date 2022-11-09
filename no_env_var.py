@@ -37,8 +37,7 @@ days_since = (start - src_file_last_commit_time).days
 
 if days_since > 7:
     printLog("File from github was last updated " + str(days_since) + " days ago, no changes since last update")
-    printElapsedTime()
-    exit()
+
 
 try:
     r = requests.get('https://raw.githubusercontent.com/hurlbertlab/dietdatabase/master/AvianDietDatabase.txt')
@@ -117,8 +116,8 @@ with open(filename,'r',encoding = 'cp1252') as f:
     with open('tester.txt','w', encoding ='cp1252',newline='\r\n') as w:
         w.write(f.read().replace('\n','\r\n'))
 
-with open('tester.txt', 'rb') as x:
-    print(x.read())
+# with open('tester.txt', 'rb') as x:
+#     print(x.read())
 
 # print("Begin inserting rows to DB" + str(datetime.now()))
 # with open(filename, newline='', encoding='cp1252') as new_table:
