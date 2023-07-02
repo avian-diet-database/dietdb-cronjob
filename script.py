@@ -64,7 +64,7 @@ print("Fetching from DB where state is approved")
 cursor.execute("SELECT * FROM approved_diet_view")
 approved_table_results = cursor.fetchall()
 
-if len(approved_table_results) >= 0:
+if len(approved_table_results) > 0:
     web_app_updated = True
     print("ADD has new submissions through web portal")
 
