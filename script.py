@@ -70,7 +70,6 @@ if len(approved_table_results) > 0:
 
 if (github_file_updated == False) and (web_app_updated == False):
     print("no updated submissions, cronjob will exit")
-    os.remove(filename)
     printElapsedTime()
     exit(1)
 
