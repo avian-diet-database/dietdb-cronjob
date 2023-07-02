@@ -71,7 +71,7 @@ if len(approved_table_results) > 0:
 if (github_file_updated == False) and (web_app_updated == False):
     print("no updated submissions, cronjob will exit")
     printElapsedTime()
-    exit(1)
+    exit(0)
 
 printLog(start.isoformat() + " - Updating avian_diet table")
 
