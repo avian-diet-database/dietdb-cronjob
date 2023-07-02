@@ -26,8 +26,8 @@ filename = 'dietdatabase.txt'
 approvedTableFile = 'approvedtable.txt'
 columnNames = ['common_name', 'scientific_name', 'subspecies', 'family', 'taxonomy', 'longitude_dd', 'latitude_dd', 'altitude_min_m', 'altitude_max_m', 'altitude_mean_m', 'location_region', 'location_specific', 'habitat_type', 'observation_month_begin', 'observation_month_end', 'observation_year_begin', 'observation_year_end', 'observation_season', 'analysis_number', 'prey_kingdom', 'prey_phylum', 'prey_class', 'prey_order', 'prey_suborder', 'prey_family', 'prey_genus', 'prey_scientific_name', 'inclusive_prey_taxon', 'prey_name_ITIS_ID', 'prey_name_status', 'prey_stage', 'prey_part', 'prey_common_name', 'fraction_diet', 'diet_type', 'item_sample_size', 'bird_sample_size', 'sites', 'study_type', 'notes', 'entered_by', 'source', 'doi', 'sex', 'age_class', 'within_study_data_source', 'table_fig_number', 'title', 'lastname_author', 'source_year', 'journal']
 start = datetime.now()
-
-printLog(start.isoformat() + " - Updating avian_diet table")
+github_file_updated = False
+web_app_updated = False
 
 source_file_info = requests.get(source_data_info)
 json_response = source_file_info.json()
@@ -35,23 +35,10 @@ time = json_response[0]["commit"]["author"]["date"]
 src_file_last_commit_time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ')
 days_since = (start - src_file_last_commit_time).days
 
-if days_since > 7:
-    printLog("File from github was last updated " + str(days_since) + " days ago, no changes since last update")
+printLog("File from github was last updated " + str(days_since) + " days ago")
 
-try:
-    r = requests.get(source_data_url)
-except Exception as e:
-    printError(e)
-    printElapsedTime()
-    exit(1)
-
-if not r.ok:
-    printError("Source data url returned error: " + source_data_url)
-    printElapsedTime()
-    exit(1)
-
-with open(filename, 'wb') as f:
-    f.write(r.content)
+if days_since < 7:
+    github_file_updated = True
 
 try:
     conn = mysql.connector.connect(host=db_host,
@@ -71,6 +58,40 @@ except mysql.connector.Error as err:
 
 cursor = conn.cursor()
 
+print("Fetching from DB where state is approved")
+#Fetch avian_diet_pending where state = "approved"
+
+cursor.execute("SELECT * FROM approved_diet_view")
+approved_table_results = cursor.fetchall()
+
+if len(approved_table_results) >= 0:
+    web_app_updated = True
+    print("ADD has new submissions through web portal")
+
+if (github_file_updated == False) and (web_app_updated == False):
+    print("no updated submissions, cronjob will exit")
+    os.remove(filename)
+    printElapsedTime()
+    exit(1)
+
+printLog(start.isoformat() + " - Updating avian_diet table")
+
+try:
+    r = requests.get(source_data_url)
+except Exception as e:
+    printError(e)
+    printElapsedTime()
+    exit(1)
+
+if not r.ok:
+    printError("Source data url returned error: " + source_data_url)
+    printElapsedTime()
+    exit(1)
+
+with open(filename, 'wb') as f:
+    f.write(r.content)
+
+
 # Add data to a new table to back up old table later..this step happends now because Creating/Deleting implicitly commits
 try:
     cursor.execute("DROP TABLE IF EXISTS avian_diet_new")
@@ -82,12 +103,6 @@ except mysql.connector.Error as err:
     os.remove(filename)
     printElapsedTime()
     exit(1)
-
-print("Fetching from DB where state is approved")
-#Fetch avian_diet_pending where state = "approved"
-
-cursor.execute("SELECT * FROM approved_diet_view")
-approved_table_results = cursor.fetchall()
 
 #Update all "approved" records to approved/processed"
 cursor.execute("UPDATE avian_diet_pending SET state = 'approved/processed' WHERE unique_id > 0 AND state = 'approved'")
